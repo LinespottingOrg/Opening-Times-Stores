@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+*.user
+api-passwords.md
+**/settings.json
+publish/
+Package/layout/
+dist/*.pfx
+dist/installer/**/OpeningTimesWidget.exe
+dist/installer/**/*.pdb
