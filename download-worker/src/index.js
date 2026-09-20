@@ -21,7 +21,7 @@ export default {
           "https://downloads.linespotting.com/opening-times-stores/docs/privacy.html",
           "",
           "Windows setup (Partner Center Package URL):",
-          "https://downloads.linespotting.com/opening-times-stores/downloads/1.0.0/setup.exe",
+          "https://downloads.linespotting.com/opening-times-stores/downloads/1.0.2/setup.exe",
           "",
           "GitHub:",
           "https://github.com/LinespottingOrg/Opening-Times-Stores",
@@ -31,8 +31,13 @@ export default {
     }
 
     // Map short alias
-    if (path === "/setup.exe" || path === "/1.0.0/setup.exe") {
-      path = "/opening-times-stores/downloads/1.0.0/setup.exe";
+    if (path === "/setup.exe" || path === "/1.0.2/setup.exe" || path === "/1.0.1/setup.exe" || path === "/1.0.0/setup.exe") {
+      if (path === "/1.0.1/setup.exe")
+        path = "/opening-times-stores/downloads/1.0.1/setup.exe";
+      else if (path === "/1.0.0/setup.exe")
+        path = "/opening-times-stores/downloads/1.0.0/setup.exe";
+      else
+        path = "/opening-times-stores/downloads/1.0.2/setup.exe";
     }
 
     // Docs HTML for Partner Center

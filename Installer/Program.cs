@@ -24,7 +24,7 @@ static class ExitCodes
 
 static class Program
 {
-    static readonly string MutexName = "Global\\Linespotting_OpeningTimesStores_Setup_1_0_1";
+    static readonly string MutexName = "Global\\Linespotting_OpeningTimesStores_Setup_1_0_2";
     static readonly string TargetDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "Programs",

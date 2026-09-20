@@ -40,7 +40,7 @@ public sealed class WeatherToday
 
 public static class WeatherService
 {
-    public const string UserAgent = "OpeningTimesEU/1.0.1 (davirad@gmail.com)";
+    public const string UserAgent = "OpeningTimesEU/1.0.2 (info@linespotting.com)";
     private const string Api = "https://api.met.no/weatherapi/locationforecast/2.0/compact";
 
     private static readonly HttpClient Http = CreateClient();

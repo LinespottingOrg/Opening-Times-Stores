@@ -22,7 +22,7 @@ dotnet run --project OpeningTimesWidget
 
 ```
 https://downloads.linespotting.com/opening-times-stores/docs/privacy.html
-https://downloads.linespotting.com/opening-times-stores/downloads/1.0.0/setup.exe
+https://downloads.linespotting.com/opening-times-stores/downloads/1.0.2/setup.exe
 ```
 
 Weather uses MET Norway Locationforecast 2.0 (same data as yr.no). Sun times via Open-Meteo. No Linespotting account required.
