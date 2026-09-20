@@ -15,8 +15,8 @@ public sealed class MainForm : Form
     private readonly Panel _weatherHost = new() { Dock = DockStyle.Right, Width = WeatherBar.PanelWidth };
     private readonly WeatherBar _weatherBar = new() { Dock = DockStyle.Fill };
     private readonly Panel _dayStrip = new() { Dock = DockStyle.Top, Height = 32 };
-    private readonly Panel _searchHost = new() { Dock = DockStyle.Top, Height = StoreRowControl.MinRowHeight + 16 };
-    private readonly Panel _addHost = new() { Dock = DockStyle.Bottom, Height = StoreRowControl.MinRowHeight + 20 };
+    private readonly Panel _searchHost = new() { Dock = DockStyle.Top, Height = 64 };
+    private readonly Panel _addHost = new() { Dock = DockStyle.Bottom, Height = 64 };
     // AutoScroll OFF by default — form grows instead. Only on if content > screen.
     private readonly Panel _listHost = new()
     {
@@ -397,9 +397,9 @@ public sealed class MainForm : Form
     private void LayoutPills()
     {
         const int side = 14;
-        var h = StoreRowControl.MinRowHeight;
-        _search.SetBounds(side, (_searchHost.Height - h) / 2, Math.Max(120, _searchHost.ClientSize.Width - side * 2), h);
-        _add.SetBounds(side, (_addHost.Height - h) / 2, Math.Max(120, _addHost.ClientSize.Width - side * 2), h);
+        const int h = 44;
+        _search.SetBounds(side, Math.Max(4, (_searchHost.Height - h) / 2), Math.Max(120, _searchHost.ClientSize.Width - side * 2), h);
+        _add.SetBounds(side, Math.Max(4, (_addHost.Height - h) / 2), Math.Max(120, _addHost.ClientSize.Width - side * 2), h);
     }
 
     private void WireSuggestions()
@@ -652,37 +652,34 @@ public sealed class MainForm : Form
             var idealH = chrome + stackH + Padding.Vertical + 72;
 
             var wa = Screen.FromControl(this).WorkingArea;
-            // Prefer almost full working height before introducing scroll
-            var maxH = Math.Max(MinimumSize.Height, Math.Min((int)(wa.Height * 0.98), 1400));
+            var maxH = Math.Max(MinimumSize.Height, wa.Height - 16);
             var minH = MinimumSize.Height;
 
-            if (idealH <= maxH)
+            Height = Math.Clamp(idealH, minH, maxH);
+            LayoutStack(forScroll: false);
+
+            var need = MeasureStackHeight();
+            var have = _listHost.ClientSize.Height;
+            if (need > have + 2 && Height < maxH)
             {
-                DisableListScroll();
-                Height = Math.Clamp(idealH, minH, maxH);
+                Height = Math.Min(maxH, Height + (need - have) + 24);
                 LayoutStack(forScroll: false);
-
-                // Second pass: if list client still shorter than content, grow again
-                var need = MeasureStackHeight();
-                var have = _listHost.ClientSize.Height;
-                if (need > have + 2 && Height < maxH)
-                {
-                    Height = Math.Min(maxH, Height + (need - have) + 32);
-                    LayoutStack(forScroll: false);
-                }
-
-                DisableListScroll();
+                need = MeasureStackHeight();
+                have = _listHost.ClientSize.Height;
             }
-            else
+
+            if (need > have + 2)
             {
-                // Only when taller than screen — allow vertical scroll
-                Height = maxH;
                 LayoutStack(forScroll: true);
                 _listHost.AutoScroll = true;
-                _listHost.AutoScrollMinSize = new Size(0, MeasureStackHeight());
+                _listHost.AutoScrollMinSize = new Size(0, need);
                 _listHost.HorizontalScroll.Enabled = false;
                 _listHost.HorizontalScroll.Visible = false;
                 _listHost.VerticalScroll.Enabled = true;
+            }
+            else
+            {
+                DisableListScroll();
             }
 
             if (Top + Height > wa.Bottom)
