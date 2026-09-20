@@ -1,0 +1,14 @@
+name = "opening-times-stores-dl"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+account_id = "dfb283fd1d2c9792a94419d68eeb1cc3"
+workers_dev = true
+
+# Custom host for Partner Center (Contoso-style URL)
+routes = [
+  { pattern = "downloads.linespotting.com/*", zone_name = "linespotting.com" }
+]
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "opening-times-stores-dl"

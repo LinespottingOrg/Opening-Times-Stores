@@ -132,6 +132,37 @@ public static class HoursHelper
         return "—";
     }
 
+    /// <summary>Compact week in the widget, e.g. "mån–fre 09:00–19:00 · lör 09:00–17:00 · sön stängt".</summary>
+    public static string FormatWeek(StoreEntry store)
+    {
+        int[] order = [1, 2, 3, 4, 5, 6, 0];
+        string[] names = ["sön", "mån", "tis", "ons", "tor", "fre", "lör"];
+        var days = order.Select(d =>
+        {
+            var raw = GetDayHours(store, d);
+            if (string.IsNullOrWhiteSpace(raw) || raw is "—" or "-")
+                return "stängt";
+            if (raw.Contains("Closed", StringComparison.OrdinalIgnoreCase) ||
+                raw.Contains("stäng", StringComparison.OrdinalIgnoreCase))
+                return "stängt";
+            return raw.Replace(" - ", "–").Replace("-", "–");
+        }).ToArray();
+
+        var parts = new List<string>();
+        var i = 0;
+        while (i < 7)
+        {
+            var j = i;
+            while (j + 1 < 7 && days[j + 1] == days[i]) j++;
+            var from = names[order[i]];
+            var to = names[order[j]];
+            var label = i == j ? from : $"{from}–{to}";
+            parts.Add($"{label} {days[i]}");
+            i = j + 1;
+        }
+        return string.Join("  ·  ", parts);
+    }
+
     public static bool TryParseRange(string text, out TimeSpan open, out TimeSpan close)
     {
         open = default;

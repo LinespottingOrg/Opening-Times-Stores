@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy — Opening Times - Stores</title>
+  <style>
+    body { font-family: Segoe UI, system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1a1a1e; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.1rem; margin-top: 1.5rem; }
+    .muted { color: #5c5c66; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy — Opening Times - Stores</h1>
+  <p class="muted">
+    Publisher: Linespotting AB · Effective: 2026-09-20 · Product version 1.0.1<br />
+    Platforms: Windows desktop · Android (Google Play package <code>app.openingtimes</code>) · iOS (when released)
+  </p>
+
+  <h2>Summary</h2>
+  <p>
+    Opening Times EU shows favourite store opening hours, optional specials,
+    local sunrise/sunset, and (on Windows) today’s weather for your saved places.
+    Core features work without a Linespotting account.
+    There are no in-app purchases and no ads in the current versions.
+  </p>
+
+  <h2>Data stored on your device</h2>
+  <ul>
+    <li><strong>All platforms:</strong> Favourite store list and hours cache on the device only.</li>
+    <li><strong>Windows:</strong> Theme, sun-place settings, and optional xAI API token in local app data
+      (<code>%LocalAppData%\OpeningTimesWidget\</code>). The token is never uploaded to Linespotting servers.</li>
+    <li><strong>Android / iOS:</strong> Store list via on-device storage (AsyncStorage). No account sync.</li>
+  </ul>
+
+  <h2>Network requests</h2>
+  <ul>
+    <li><strong>Windows — MET Norway / yr.no</strong> (<code>api.met.no</code> Locationforecast 2.0): weather for the places shown in the widget (default Stora Frö, Kalmar, Karleby). A User-Agent with contact email is sent as required by MET. Forecast JSON may be cached on the device. Temperature and symbols stay in the widget; the app does not open yr.no in a browser for normal use.</li>
+    <li><strong>Windows — Open-Meteo</strong> (open-meteo.com): sunrise/sunset and optional place geocoding.</li>
+    <li><strong>Windows — xAI</strong> (api.x.ai): only if you provide an API token and a weekly hours refresh runs.</li>
+    <li>Mobile builds do not call xAI, MET, or Open-Meteo in the current 1.0.0 release.</li>
+  </ul>
+
+  <h2>What we do not do</h2>
+  <ul>
+    <li>No advertising ID tracking in the app.</li>
+    <li>No sale of personal data.</li>
+    <li>No mandatory cloud account for core features.</li>
+    <li>No Google Play Billing / subscriptions in this app.</li>
+    <li>No analytics SDKs that identify you for advertising.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>
+    The app is a utility for store hours. It is not directed at children under 13.
+    We do not knowingly collect personal information from children.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Linespotting AB<br />
+    Support: <a href="mailto:info@linespotting.com">info@linespotting.com</a><br />
+    Web: <a href="https://linespotting.com">https://linespotting.com</a>
+  </p>
+
+  <p class="muted">
+    Canonical privacy URL (use this in Google Play Console and in-app):
+    <a href="https://downloads.linespotting.com/opening-times-stores/docs/privacy.html">https://downloads.linespotting.com/opening-times-stores/docs/privacy.html</a><br />
+    Installer docs (Windows):
+    <a href="https://downloads.linespotting.com/opening-times-stores/docs/installer-return-codes.html">return codes</a>
+  </p>
+</body>
+</html>

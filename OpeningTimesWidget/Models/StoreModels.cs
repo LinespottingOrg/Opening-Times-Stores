@@ -33,10 +33,53 @@ public sealed class AppSettings
     public DateTime? LastWeeklyUpdateUtc { get; set; }
     /// <summary>"dark" or "light" — persisted theme for dark/light slider.</summary>
     public string Theme { get; set; } = "dark";
-    /// <summary>Place name for sunrise/sunset (default Kalmar).</summary>
-    public string SunPlaceName { get; set; } = "Kalmar";
-    public double SunLatitude { get; set; } = 56.6634;
-    public double SunLongitude { get; set; } = 16.3567;
+    /// <summary>Primary place for sunrise + outdoor-work weather (Stora Frö).</summary>
+    public string SunPlaceName { get; set; } = "Stora Frö";
+    public double SunLatitude { get; set; } = 56.5708;
+    public double SunLongitude { get; set; } = 16.4174;
     public string SunTimezone { get; set; } = "Europe/Stockholm";
+    public List<WeatherPlace> WeatherPlaces { get; set; } = new();
     public List<StoreEntry> Stores { get; set; } = new();
+}
+
+/// <summary>A yr.no location shown in the weather bar.</summary>
+public sealed class WeatherPlace
+{
+    public string Name { get; set; } = "";
+    public double Lat { get; set; }
+    public double Lon { get; set; }
+    public string Timezone { get; set; } = "Europe/Stockholm";
+    public string YrUrl { get; set; } = "";
+    public bool Primary { get; set; }
+
+    public static IReadOnlyList<WeatherPlace> DavidDefaults { get; } =
+    [
+        new()
+        {
+            Name = "Stora Frö",
+            Lat = 56.5708,
+            Lon = 16.4174,
+            Timezone = "Europe/Stockholm",
+            YrUrl = "https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-2673269/Sverige/Kalmar%20l%C3%A4n/M%C3%B6rbyl%C3%A5nga%20Kommun/Stora%20Fr%C3%B6",
+            Primary = true
+        },
+        new()
+        {
+            Name = "Kalmar",
+            Lat = 56.6634,
+            Lon = 16.3567,
+            Timezone = "Europe/Stockholm",
+            YrUrl = "https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-2702261/Sverige/Kalmar%20l%C3%A4n/Kalmar%20Municipality/Kalmar",
+            Primary = false
+        },
+        new()
+        {
+            Name = "Karleby",
+            Lat = 63.8385,
+            Lon = 23.1307,
+            Timezone = "Europe/Helsinki",
+            YrUrl = "https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-651943/Finland/Mellersta%20%C3%96sterbotten/Kokkola/Karleby",
+            Primary = false
+        }
+    ];
 }

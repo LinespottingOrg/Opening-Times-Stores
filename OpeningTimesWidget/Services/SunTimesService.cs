@@ -6,7 +6,7 @@ namespace OpeningTimesWidget.Services;
 
 public sealed class SunDay
 {
-    public string Place { get; init; } = "Kalmar";
+    public string Place { get; init; } = "Stora Frö";
     public TimeOnly? Sunrise { get; init; }
     public TimeOnly? Sunset { get; init; }
     public string? Error { get; init; }

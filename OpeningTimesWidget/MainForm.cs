@@ -11,7 +11,9 @@ public sealed class MainForm : Form
 {
     // Chrome
     private readonly Panel _header = new() { Dock = DockStyle.Top, Height = 56 };
-    private readonly Panel _sunStrip = new() { Dock = DockStyle.Top, Height = 28 };
+    private readonly Panel _body = new() { Dock = DockStyle.Fill };
+    private readonly Panel _weatherHost = new() { Dock = DockStyle.Right, Width = WeatherBar.PanelWidth };
+    private readonly WeatherBar _weatherBar = new() { Dock = DockStyle.Fill };
     private readonly Panel _dayStrip = new() { Dock = DockStyle.Top, Height = 32 };
     private readonly Panel _searchHost = new() { Dock = DockStyle.Top, Height = StoreRowControl.MinRowHeight + 16 };
     private readonly Panel _addHost = new() { Dock = DockStyle.Bottom, Height = StoreRowControl.MinRowHeight + 20 };
@@ -21,7 +23,7 @@ public sealed class MainForm : Form
         Dock = DockStyle.Fill,
         AutoScroll = false,
         // Generous bottom padding so last store never needs vertical scroll
-        Padding = new Padding(14, 10, 14, 28)
+        Padding = new Padding(14, 10, 14, 56)
     };
 
     private readonly Label _grip = new()
@@ -34,18 +36,9 @@ public sealed class MainForm : Form
     };
     private readonly Label _title = new()
     {
-        Text = "Opening Times",
+        Text = "Opening Times EU",
         AutoSize = true,
         Font = new Font("Segoe UI Semibold", 10.5f) // smaller app name
-    };
-    private readonly Label _sunLabel = new()
-    {
-        AutoSize = false,
-        Dock = DockStyle.Fill,
-        Font = new Font("Segoe UI Semibold", 9f),
-        TextAlign = ContentAlignment.MiddleLeft,
-        Padding = new Padding(16, 0, 0, 0),
-        Text = "Sol · Kalmar  ·  ↑ —  ·  ↓ —"
     };
     private readonly Label _dayLabel = new()
     {
@@ -90,34 +83,40 @@ public sealed class MainForm : Form
     private ContextMenuStrip? _ctx;
     private string _filter = "";
     private bool _fitting;
-    private string _sunLine = "Sol · Kalmar  ·  ↑ —  ·  ↓ —";
+    private SunDay _sunDay = new();
 
     public MainForm()
     {
-        Text = "Opening Times - Stores";
+        Text = "Opening Times EU";
+        Icon = AppIcons.Load(32);
+        AutoScaleMode = AutoScaleMode.None;
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = true;
         StartPosition = FormStartPosition.Manual;
-        Size = new Size(560, 720);
-        MinimumSize = new Size(480, 360);
+        Size = new Size(1180, 820);
+        MinimumSize = new Size(1020, 520);
         Location = new Point(48, 30);
         DoubleBuffered = true;
         TopMost = false; // normal window priority — not always-on-top
         Padding = new Padding(1);
 
         BuildHeader();
-        BuildSunStrip();
+        BuildWeatherSide();
         BuildDayStrip();
         BuildSearch();
         BuildAdd();
         BuildMenu();
         WireSuggestions();
 
-        // Dock: fill first in z-order, then top/bottom (WinForms docks last-added outer)
-        Controls.Add(_listHost);
+        // Body: stores fill left, weather docked right.
+        _weatherHost.Controls.Add(_weatherBar);
+        _body.Controls.Add(_listHost);
+        _body.Controls.Add(_weatherHost);
+
+        // Dock: fill first, then top/bottom (WinForms docks last-added outer)
+        Controls.Add(_body);
         Controls.Add(_searchHost);
         Controls.Add(_dayStrip);
-        Controls.Add(_sunStrip);
         Controls.Add(_header);
         Controls.Add(_addHost);
         Controls.Add(_searchSuggestions);
@@ -125,17 +124,25 @@ public sealed class MainForm : Form
 
         _tray = new NotifyIcon
         {
-            Text = "Opening Times - Stores",
+            Text = "Opening Times EU",
             Visible = true,
-            Icon = TryIcon(),
+            Icon = AppIcons.Load(16),
             ContextMenuStrip = _ctx
         };
         _tray.DoubleClick += (_, _) => { Show(); WindowState = FormWindowState.Normal; Activate(); };
+
+        Shown += (_, _) =>
+        {
+            if (Width < 1100) Width = 1100;
+            LayoutWeather();
+            LayoutStack(forScroll: false);
+        };
 
         // Do NOT re-fit on every listHost.Resize (that fights AutoScroll and causes dual bars).
         Resize += (_, _) =>
         {
             if (_fitting) return;
+            LayoutWeather();
             LayoutHeader();
             LayoutPills();
             PositionSuggestionPanels();
@@ -156,23 +163,28 @@ public sealed class MainForm : Form
                 _theme = AppTheme.Parse(_settings.Theme);
                 _themeToggle.Mode = _theme;
                 ApplyTheme();
+                LayoutWeather();
                 RebuildList();
-                BeginInvoke(() => FitHeightToContent(force: true));
-                _ = RefreshSunAsync();
+                BeginInvoke(() =>
+                {
+                    LayoutWeather();
+                    FitHeightToContent(force: true);
+                });
+                _ = RefreshWeatherAsync();
                 _weekTimer.Tick += async (_, _) => await RunUpdateAsync(false);
                 _weekTimer.Start();
                 _closingTimer.Tick += (_, _) =>
                 {
                     // Refresh "Closes in …" lines without full reload
                     RebuildList(adjustWindowHeight: false);
-                    _ = RefreshSunAsync();
+                    _ = RefreshWeatherAsync();
                 };
                 _closingTimer.Start();
                 await RunUpdateAsync(false);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message, "Opening Times - Stores");
+                MessageBox.Show(this, ex.Message, "Opening Times EU");
             }
         };
 
@@ -254,20 +266,23 @@ public sealed class MainForm : Form
         _title.MaximumSize = new Size(Math.Max(60, x - 48), 28);
     }
 
-    private void BuildSunStrip()
+    private void BuildWeatherSide()
     {
-        _sunStrip.Controls.Add(_sunLabel);
-        void WireDrag(Control c)
-        {
-            c.MouseDown += (_, e) => { if (e.Button == MouseButtons.Left) _drag = e.Location; };
-            c.MouseMove += (_, e) =>
-            {
-                if (e.Button == MouseButtons.Left)
-                    Location = new Point(Location.X + e.X - _drag.X, Location.Y + e.Y - _drag.Y);
-            };
-        }
-        WireDrag(_sunStrip);
-        WireDrag(_sunLabel);
+        _weatherHost.Padding = new Padding(0);
+        LayoutWeather();
+    }
+
+    /// <summary>Weather is ~40% of the window so DPI cannot clip it off the right edge.</summary>
+    private void LayoutWeather()
+    {
+        var w = ClientSize.Width;
+        if (w < 100) return;
+        // Never narrower than 360, never more than half the window.
+        var weatherW = Math.Clamp((int)(w * 0.42), 360, Math.Max(360, w / 2));
+        if (w - weatherW < 320)
+            weatherW = Math.Max(280, w - 320);
+        _weatherHost.Width = weatherW;
+        _weatherHost.MinimumSize = new Size(weatherW, 0);
     }
 
     private void BuildDayStrip()
@@ -281,43 +296,39 @@ public sealed class MainForm : Form
         };
     }
 
-    private async Task RefreshSunAsync()
+    private async Task RefreshWeatherAsync()
     {
         try
         {
-            EnsureSunDefaults();
-            var place = string.IsNullOrWhiteSpace(_settings.SunPlaceName) ? "Kalmar" : _settings.SunPlaceName;
-            var day = await SunTimesService.GetTodayAsync(
-                place, _settings.SunLatitude, _settings.SunLongitude, _settings.SunTimezone);
-            _sunLine = "  " + day.DisplayLine;
+            SettingsStore.EnsureWeatherPlaces(_settings);
+            var primary = _settings.WeatherPlaces.FirstOrDefault(p => p.Primary) ?? _settings.WeatherPlaces[0];
+            var sunTask = SunTimesService.GetTodayAsync(
+                primary.Name, primary.Lat, primary.Lon, primary.Timezone);
+            var wxTask = WeatherService.GetPlacesAsync(_settings.WeatherPlaces);
+            _sunDay = await sunTask;
+            var places = await wxTask;
             if (IsHandleCreated && !IsDisposed)
             {
                 BeginInvoke(() =>
                 {
-                    _sunLabel.Text = _sunLine;
-                    _sunLabel.ForeColor = day.Error != null ? _palette.TextSecondary : _palette.OpensTomorrow;
+                    _weatherBar.Bind(places, _sunDay, _palette);
+                    RebuildList(adjustWindowHeight: false);
                 });
             }
         }
         catch
         {
-            _sunLine = "  Sol · —";
             if (IsHandleCreated && !IsDisposed)
-                BeginInvoke(() => _sunLabel.Text = _sunLine);
+            {
+                BeginInvoke(() =>
+                    _weatherBar.Bind(WeatherToday.Empty("Stora Frö", "väder —"), _sunDay, _palette));
+            }
         }
     }
 
     private void EnsureSunDefaults()
     {
-        if (string.IsNullOrWhiteSpace(_settings.SunPlaceName))
-            _settings.SunPlaceName = "Kalmar";
-        if (Math.Abs(_settings.SunLatitude) < 0.01 && Math.Abs(_settings.SunLongitude) < 0.01)
-        {
-            _settings.SunLatitude = 56.6634;
-            _settings.SunLongitude = 16.3567;
-        }
-        if (string.IsNullOrWhiteSpace(_settings.SunTimezone))
-            _settings.SunTimezone = "Europe/Stockholm";
+        SettingsStore.EnsureWeatherPlaces(_settings);
     }
 
     private void BuildSearch()
@@ -416,7 +427,7 @@ public sealed class MainForm : Form
             ApplyTheme();
             RebuildList();
             FitHeightToContent(true);
-            _ = RefreshSunAsync();
+            _ = RefreshWeatherAsync();
         });
         _ctx.Items.Add(new ToolStripSeparator());
         _ctx.Items.Add("Exit", null, (_, _) => { _tray?.Dispose(); Application.Exit(); });
@@ -430,7 +441,8 @@ public sealed class MainForm : Form
         _palette = AppTheme.For(_theme);
         BackColor = _palette.WindowBg;
         _header.BackColor = _palette.Header;
-        _sunStrip.BackColor = _palette.Header;
+        _body.BackColor = _palette.WindowBg;
+        _weatherHost.BackColor = _palette.Header;
         _dayStrip.BackColor = _palette.Header;
         _searchHost.BackColor = _palette.WindowBg;
         _addHost.BackColor = _palette.WindowBg;
@@ -440,9 +452,12 @@ public sealed class MainForm : Form
         _grip.BackColor = _palette.Header;
         _title.ForeColor = _palette.TextPrimary;
         _title.BackColor = _palette.Header;
-        _sunLabel.BackColor = _palette.Header;
-        _sunLabel.ForeColor = _palette.OpensTomorrow;
-        _sunLabel.Text = _sunLine;
+        _weatherBar.BackColor = _palette.Header;
+        _weatherBar.Bind(
+            WeatherService.LatestAll.Count > 0
+                ? WeatherService.LatestAll
+                : new[] { WeatherService.Latest ?? WeatherToday.Empty("Stora Frö") },
+            _sunDay, _palette);
         _dayLabel.ForeColor = _palette.DayStrip;
         _dayLabel.BackColor = _palette.Header;
 
@@ -507,7 +522,7 @@ public sealed class MainForm : Form
                     Width = w,
                     Location = new Point(_listHost.Padding.Left, y)
                 };
-                row.Bind(s, day, _palette);
+                row.Bind(s, day, _palette, WeatherService.Latest);
                 row.Width = w;
                 row.Relayout();
                 _listHost.Controls.Add(row);
@@ -547,13 +562,14 @@ public sealed class MainForm : Form
         }
     }
 
-    /// <summary>Row width from form width (stable). Optionally leave room for a vertical scrollbar.</summary>
+    /// <summary>Row width of the LEFT list only (not the weather column).</summary>
     private int RowWidth(bool forScroll)
     {
-        // Use nearly full form width so long names (e.g. KSRR Färjestaden) are not clipped
-        var formInner = Math.Max(400, ClientSize.Width - Padding.Horizontal);
+        var listInner = _listHost.ClientSize.Width;
+        if (listInner < 80)
+            listInner = Math.Max(320, ClientSize.Width - Padding.Horizontal - _weatherHost.Width);
         var scrollGutter = forScroll ? SystemInformation.VerticalScrollBarWidth + 2 : 0;
-        return Math.Max(320, formInner - _listHost.Padding.Horizontal - scrollGutter);
+        return Math.Max(240, listInner - _listHost.Padding.Horizontal - scrollGutter);
     }
 
     private int MeasureStackHeight()
@@ -631,9 +647,9 @@ public sealed class MainForm : Form
             LayoutStack(forScroll: false);
 
             var stackH = MeasureStackHeight();
-            var chrome = _header.Height + _sunStrip.Height + _dayStrip.Height + _searchHost.Height + _addHost.Height;
+            var chrome = _header.Height + _dayStrip.Height + _searchHost.Height + _addHost.Height;
             // Large slack: chrome + full stack + breathing room under last card
-            var idealH = chrome + stackH + Padding.Vertical + 48;
+            var idealH = chrome + stackH + Padding.Vertical + 72;
 
             var wa = Screen.FromControl(this).WorkingArea;
             // Prefer almost full working height before introducing scroll
@@ -673,6 +689,7 @@ public sealed class MainForm : Form
                 Top = Math.Max(wa.Top + 4, wa.Bottom - Height - 8);
             if (Left < wa.Left) Left = wa.Left + 4;
 
+            LayoutWeather();
             LayoutHeader();
             LayoutPills();
             PositionSuggestionPanels();
@@ -724,7 +741,7 @@ public sealed class MainForm : Form
         // Align with search/add pills — no window resize
         if (_searchSuggestions.Visible)
         {
-            var top = _header.Height + _sunStrip.Height + _dayStrip.Height + _searchHost.Height - 2;
+            var top = _header.Height + _dayStrip.Height + _searchHost.Height - 2;
             var w = Math.Max(220, ClientSize.Width - 28);
             _searchSuggestions.SetBounds(14, top, w, _searchSuggestions.Height);
             _searchSuggestions.BringToFront();
@@ -784,7 +801,7 @@ public sealed class MainForm : Form
         ApplyTheme();
         RebuildList();
         FitHeightToContent(true);
-        _ = RefreshSunAsync();
+        _ = RefreshWeatherAsync();
         _dayLabel.Text = $"  {DateTime.Now:dddd · d MMM}   ·   settings saved";
     }
 
@@ -809,8 +826,6 @@ public sealed class MainForm : Form
             _dayLabel.Text = $"  {DateTime.Now:dddd · d MMM}   ·   update skipped";
         }
     }
-
-    private static Icon TryIcon() => SystemIcons.Application;
 
     protected override void Dispose(bool disposing)
     {

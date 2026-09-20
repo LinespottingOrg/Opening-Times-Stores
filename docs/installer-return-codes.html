@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Opening Times - Stores — Installer return codes</title>
+  <style>
+    body { font-family: Segoe UI, system-ui, sans-serif; max-width: 820px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1e; line-height: 1.5; }
+    h1 { font-size: 1.4rem; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #f4f5f7; }
+    code { background: #f0f0f0; padding: 0.1rem 0.35rem; border-radius: 4px; }
+    .muted { color: #5c5c66; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <h1>Opening Times - Stores — Installer return codes</h1>
+  <p class="muted">
+    Product: <strong>Opening Times - Stores</strong> · Installer: <code>setup.exe</code> · Version <strong>1.0.0</strong><br />
+    Package URL:
+    <a href="https://downloads.linespotting.com/opening-times-stores/downloads/1.0.0/setup.exe">
+      https://downloads.linespotting.com/opening-times-stores/downloads/1.0.0/setup.exe
+    </a>
+  </p>
+
+  <h2>Silent install parameters</h2>
+  <p>Use: <code>/S</code> (also: <code>/silent</code>, <code>/quiet</code>, <code>/q</code>, <code>/VERYSILENT</code>, <code>/qn</code>)</p>
+  <p>Optional reinstall: <code>/S /force</code></p>
+
+  <h2>Standard scenarios (EXE return codes)</h2>
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>EXE return code</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Installation successful</td>
+        <td><code>0</code></td>
+        <td>Files installed under <code>%LocalAppData%\Programs\OpeningTimesStores\</code></td>
+      </tr>
+      <tr>
+        <td>Installation cancelled by user</td>
+        <td><code>1602</code></td>
+        <td>MSI-compatible cancel code (reserved; UI cancel if added later)</td>
+      </tr>
+      <tr>
+        <td>Application already exists</td>
+        <td><code>1638</code></td>
+        <td>App already installed; use <code>/force</code> to overwrite</td>
+      </tr>
+      <tr>
+        <td>Installation already in progress</td>
+        <td><code>1618</code></td>
+        <td>Another setup instance holds the install mutex</td>
+      </tr>
+      <tr>
+        <td>Disk space is full</td>
+        <td><code>112</code></td>
+        <td>ERROR_DISK_FULL — free space below install requirement</td>
+      </tr>
+      <tr>
+        <td>Reboot required</td>
+        <td><code>3010</code></td>
+        <td>Reserved (current installer does not require reboot)</td>
+      </tr>
+      <tr>
+        <td>Network failure</td>
+        <td><code>1619</code></td>
+        <td>Reserved for download/network errors (payload is embedded in v1.0.0)</td>
+      </tr>
+      <tr>
+        <td>Package rejected during installation</td>
+        <td><code>1625</code></td>
+        <td>Access denied / security policy / unauthorized write</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Miscellaneous install failure</h2>
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>EXE return code</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Generic install failure (other I/O or unexpected error)</td>
+        <td><code>1603</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>What the installer does</h2>
+  <ul>
+    <li>Extracts the app to <code>%LocalAppData%\Programs\OpeningTimesStores\</code></li>
+    <li>Creates Start Menu shortcut: <em>Opening Times - Stores</em></li>
+    <li>Silent mode: no UI, does not launch the app</li>
+    <li>Non-silent: installs then launches the app once</li>
+  </ul>
+
+  <p class="muted">Publisher: Linespotting · Documentation version 1.0.0 · 2026-08-13</p>
+</body>
+</html>

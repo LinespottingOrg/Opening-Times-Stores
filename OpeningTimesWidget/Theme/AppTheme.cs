@@ -29,6 +29,10 @@ public sealed class ThemePalette
     public required Color DayStrip { get; init; }
     public required Color Track { get; init; }
     public required Color Thumb { get; init; }
+    /// <summary>Temperature ≥ 0 °C.</summary>
+    public required Color TempPlus { get; init; }
+    /// <summary>Temperature below 0 °C.</summary>
+    public required Color TempMinus { get; init; }
 }
 
 public static class AppTheme
@@ -51,7 +55,9 @@ public static class AppTheme
         TimerRed = Color.FromArgb(0xFF, 0x6B, 0x5A),
         DayStrip = Color.FromArgb(0x2E, 0xCC, 0x71),
         Track = Color.FromArgb(0x3A, 0x3A, 0x44),
-        Thumb = Color.FromArgb(0xF5, 0xF5, 0xF5)
+        Thumb = Color.FromArgb(0xF5, 0xF5, 0xF5),
+        TempPlus = Color.FromArgb(0x2E, 0xCC, 0x71),
+        TempMinus = Color.FromArgb(0x5B, 0xA3, 0xFF)
     };
 
     public static ThemePalette Light { get; } = new()
@@ -72,7 +78,9 @@ public static class AppTheme
         TimerRed = Color.FromArgb(0xC6, 0x3A, 0x2B),
         DayStrip = Color.FromArgb(0x1B, 0x9E, 0x4B),
         Track = Color.FromArgb(0xE2, 0xE3, 0xE8),
-        Thumb = Color.FromArgb(0x1A, 0x1A, 0x1E)
+        Thumb = Color.FromArgb(0x1A, 0x1A, 0x1E),
+        TempPlus = Color.FromArgb(0x1B, 0x9E, 0x4B),
+        TempMinus = Color.FromArgb(0x2B, 0x6C, 0xB0)
     };
 
     public static ThemePalette For(ThemeMode mode) => mode == ThemeMode.Light ? Light : Dark;

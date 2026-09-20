@@ -22,7 +22,7 @@ public sealed class SettingsForm : Form
     public ThemeMode SelectedTheme => _theme;
     public string? Token =>
         string.IsNullOrWhiteSpace(_tokenBox.Text) ? null : _tokenBox.Text.Trim();
-    public string SunPlaceName => string.IsNullOrWhiteSpace(_placeBox.Text) ? "Kalmar" : _placeBox.Text.Trim();
+    public string SunPlaceName => string.IsNullOrWhiteSpace(_placeBox.Text) ? "Stora Frö" : _placeBox.Text.Trim();
     public double SunLatitude => _lat;
     public double SunLongitude => _lon;
     public string SunTimezone => string.IsNullOrWhiteSpace(_tz) ? "Europe/Stockholm" : _tz;
@@ -31,11 +31,12 @@ public sealed class SettingsForm : Form
     {
         _p = palette;
         _theme = theme;
-        _lat = settings.SunLatitude != 0 ? settings.SunLatitude : 56.6634;
-        _lon = settings.SunLongitude != 0 ? settings.SunLongitude : 16.3567;
+        _lat = settings.SunLatitude != 0 ? settings.SunLatitude : 56.5708;
+        _lon = settings.SunLongitude != 0 ? settings.SunLongitude : 16.4174;
         _tz = string.IsNullOrWhiteSpace(settings.SunTimezone) ? "Europe/Stockholm" : settings.SunTimezone;
 
         Text = "Settings";
+        Icon = AppIcons.Load(32);
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(420, 470);
@@ -107,7 +108,7 @@ public sealed class SettingsForm : Form
         var placeCard = MakeCard(pad, y, cardW, 96);
         placeCard.Controls.Add(new Label
         {
-            Text = "Ort / stad (t.ex. Kalmar, Stockholm)",
+            Text = "Ort för sol (väder: Stora Frö + Kalmar)",
             Font = new Font("Segoe UI", 8.5f),
             ForeColor = _p.TextSecondary,
             BackColor = _p.Surface,
@@ -122,7 +123,7 @@ public sealed class SettingsForm : Form
             BorderStyle = BorderStyle.FixedSingle,
             BackColor = _p.WindowBg,
             ForeColor = _p.TextPrimary,
-            Text = string.IsNullOrWhiteSpace(settings.SunPlaceName) ? "Kalmar" : settings.SunPlaceName
+            Text = string.IsNullOrWhiteSpace(settings.SunPlaceName) ? "Stora Frö" : settings.SunPlaceName
         };
         var btnResolve = MakeBtn("Hitta", false);
         btnResolve.Size = new Size(80, 28);
@@ -235,7 +236,7 @@ public sealed class SettingsForm : Form
     private async Task ResolvePlaceAsync()
     {
         var q = _placeBox.Text.Trim();
-        if (q.Length == 0) q = "Kalmar";
+        if (q.Length == 0) q = "Stora Frö";
         _placeStatus.Text = "Söker plats…";
         _placeStatus.ForeColor = _p.TextSecondary;
         var geo = await SunTimesService.GeocodeAsync(q);

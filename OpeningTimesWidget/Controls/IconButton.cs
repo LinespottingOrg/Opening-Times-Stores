@@ -83,3 +83,28 @@ public static class UiDraw
         return path;
     }
 }
+
+/// <summary>GDI text that never clips half a glyph — rect is always at least MeasureText tall.</summary>
+public static class UiText
+{
+    public const TextFormatFlags BaseFlags = TextFormatFlags.NoPrefix;
+
+    public static Size Measure(Graphics g, string text, Font font)
+    {
+        if (string.IsNullOrEmpty(text)) text = "Åj";
+        return TextRenderer.MeasureText(g, text, font, new Size(short.MaxValue, short.MaxValue),
+            BaseFlags | TextFormatFlags.SingleLine);
+    }
+
+    public static int Line(Graphics g, Font font) => Measure(g, "Åy", font).Height;
+
+    public static void Draw(Graphics g, string text, Font font, Rectangle r, Color color, TextFormatFlags extra = 0)
+    {
+        var need = Measure(g, text, font);
+        if (r.Height < need.Height)
+            r = new Rectangle(r.X, r.Y, r.Width, need.Height);
+        if (r.Width < 4) return;
+        TextRenderer.DrawText(g, text ?? "", font, r, color,
+            BaseFlags | TextFormatFlags.EndEllipsis | extra);
+    }
+}
