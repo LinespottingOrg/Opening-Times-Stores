@@ -34,6 +34,11 @@
 | docs/privacy.html | Live privacy policy |
 | docs/installer-return-codes.html | Live return codes doc |
 | download-worker/ | CF Worker + R2 package host |
+| docs/2026-09-21 - Opening Times EU - Partner Center 1.0.2.md | Copy-paste listing + Package URL |
+| docs/2026-09-21 - Opening Times EU - Microsoft Store submitted.md | Submit done 1.0.2 |
+| store-assets/ms-store-screenshots/ss-01-full-widget.png | Store SS full widget 1366×1967 |
+| store-assets/ms-store-screenshots/ss-02-search-bauhaus.png | Store SS search Bauhaus 1366×1959 |
+| store-assets/ms-store-screenshots/ss-03-weather-closeup.png | Store SS weather close-up 1366×901 |
 | Installer/ | Silent setup.exe project |
 
 ## 2026-08-16 Google Play

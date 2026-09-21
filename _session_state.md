@@ -1,7 +1,11 @@
 # Session state — Opening Times
 
-- **Updated:** 2026-09-20 22:40
-- **This turn:** Push to `LinespottingOrg/Opening-Times-Stores`. README + privacy.html updated (yr.no/MET, in-widget weather). No dedicated linespotting.com product page — marketing is GitHub README + downloads.linespotting.com privacy.
+- **Updated:** 2026-09-21
+- **Microsoft Store:** David confirmed **Submit done** for Opening Times EU **1.0.2**. English listing Complete (3 cropped SS + 1:1 2160 + 2:3 720). Package URL 1.0.2 setup.exe. Doc: `docs/2026-09-21 - Opening Times EU - Microsoft Store submitted.md`
+- **Play:** `app.openingtimes` Published 2026-09-17 vc3. Separate.
+
+## Package URL
+https://downloads.linespotting.com/opening-times-stores/downloads/1.0.2/setup.exe
 
 ## 2026-09-20 22:32
 - Temperature color: green ≥ 0 °C, blue below 0. Reinstalled PC1.

@@ -12,6 +12,17 @@ export default {
     // Normalize trailing slash
     if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
 
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "access-control-allow-origin": "*",
+          "access-control-allow-methods": "GET, HEAD, OPTIONS",
+          "access-control-allow-headers": "*",
+        },
+      });
+    }
+
     if (path === "/" || path === "") {
       return new Response(
         [
@@ -61,8 +72,26 @@ export default {
       headers.set("content-type", "text/html; charset=utf-8");
       headers.set("content-length", String(doc.size));
       headers.set("cache-control", "public, max-age=300");
-      if (request.method === "HEAD") return new Response(null, { status: 200, headers });
+      headers.set("access-control-allow-origin", "*");
+      if (request.method === "HEAD" || request.method === "OPTIONS")
+        return new Response(null, { status: 200, headers });
       return new Response(doc.body, { status: 200, headers });
+    }
+
+    const listingPng = /^\/opening-times-stores\/listing\/[a-z0-9._-]+\.png$/i.test(path);
+    if (listingPng) {
+      const key = path.replace(/^\//, "");
+      const obj = await env.BUCKET.get(key);
+      if (!obj) return new Response("Listing image not found", { status: 404 });
+      const headers = new Headers();
+      headers.set("content-type", "image/png");
+      headers.set("content-length", String(obj.size));
+      headers.set("cache-control", "public, max-age=300");
+      headers.set("access-control-allow-origin", "*");
+      headers.set("access-control-allow-methods", "GET, HEAD, OPTIONS");
+      if (request.method === "HEAD" || request.method === "OPTIONS")
+        return new Response(null, { status: 200, headers });
+      return new Response(obj.body, { status: 200, headers });
     }
 
     // Must look versioned + downloadable
